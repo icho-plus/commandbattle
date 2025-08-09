@@ -417,7 +417,7 @@ class _MkdirAppState extends State<MkdirApp> {
   void _handlePlayerCommand(String input) {
     const int mkdirScore = 500;
     const int rmScore = 500;
-    const int cdScore = 100;
+    const int cdScore = 1000;
     const int errorScore = -1000;
     const int winScore = 10000;
 
@@ -429,6 +429,8 @@ class _MkdirAppState extends State<MkdirApp> {
     final lsRegex = RegExp(r'^ls$');
     final exitRegex = RegExp(r'^exit$');
 
+    int nullcount = _stagedItems.values.where((value) => value == null).length;
+
     if (mkdirRegex.hasMatch(input)) {
       String dirName = mkdirRegex.firstMatch(input)!.group(1)!;
       bool isSpace = false;
@@ -436,11 +438,11 @@ class _MkdirAppState extends State<MkdirApp> {
         _changeScore(errorScore);
         _addToHistory('エラー: "$dirName" は既に存在しています。');
       } else {
-        _changeScore(mkdirScore);
         setState(() {
           for (int i = 0; i < _totalSquares; i++) {
             if (_stagedItems[i] == null) {
               _stagedItems[i] = dirName;
+              _changeScore(mkdirScore-((nullcount-1)*10));
               break;
             }
             if(i==_totalSquares-1){
@@ -458,7 +460,7 @@ class _MkdirAppState extends State<MkdirApp> {
     } else if (rmRegex.hasMatch(input)) {
       String dirName = rmRegex.firstMatch(input)!.group(1)!;
       if (_stagedItems.values.contains(dirName)) {
-        _changeScore(rmScore);
+        _changeScore(rmScore*(nullcount+1));
         setState(() {
           int targetIndex = _stagedItems.keys.firstWhere((index) => _stagedItems[index] == dirName);
           if (targetIndex == playerPosition) {
